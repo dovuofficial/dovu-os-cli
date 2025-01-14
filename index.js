@@ -2,15 +2,30 @@ const {
   tasks
 } = require('./src');
 
-const config = require("./config");
+const config = require("./config")();
 
 (async () => {
 
   const key = config.workflow_key
 
-  const elv = await tasks.getWorkflowByKey(key)
+  console.log(config);
 
-  console.log(elv);
+  const workflow = await tasks.getWorkflowByKey(key)
+
+  config.update(`workflow`, workflow);
+
+
+
+  const schemas = await tasks.getWorkflowSchemas(workflow)
+
+  config.update(`schemas`, schemas.data);
+
+
+
+
+
+
+  // console.log(elv);
 
   /**
    * Tomorrow:

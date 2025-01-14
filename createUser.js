@@ -12,13 +12,13 @@ const config = require('./config')();
     throw new Error("Role/Name required for user")
   }
 
-
+  const password =  Math.random().toString('36')
   // Example user data
   const userData = {
     name: `Test ${role}`,
-    email: `${role}@${Math.random(1000).toString()}.com`,
-    password: 'password',
-    password_confirmation: 'password',
+    email: `${role}@${Math.random().toString()}.com`,
+    password,
+    password_confirmation: password,
     role,
   };
 

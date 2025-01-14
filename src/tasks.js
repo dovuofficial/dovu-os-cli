@@ -10,6 +10,8 @@ const getWorkflowByKey = async (key) => {
   return workflows.data.find(workflow => workflow.key === key)
 }
 
+const getWorkflowSchemas = ({ id }) => api.get(`workflows/${id}/schemas`)
+
 const user = () => {
 
   const register = async (user) => api.post('register', user)
@@ -27,7 +29,9 @@ const user = () => {
 }
 
 module.exports = {
+  // Workflows as-object
   getWorkflows,
   getWorkflowByKey,
+  getWorkflowSchemas,
   user
 }
