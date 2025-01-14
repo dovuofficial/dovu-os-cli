@@ -130,4 +130,7 @@ dist
 .pnp.*
 
 # internal config/state (shared between teams)
-artefacts/config.json
+config.json
+
+# IDE
+.idea/
