@@ -7,9 +7,8 @@ const {
 const config = require('./config')();
 
 module.exports = async ({
-                          key,
-                          data = {}
-                        }) => {
+  key,
+}) => {
 
   const schema = config?.schema?.[key]
 
