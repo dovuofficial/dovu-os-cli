@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Testing DOVU cli tools during dev, so continuous global installations are not required.
+node index.js "$@"

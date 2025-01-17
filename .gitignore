@@ -131,6 +131,7 @@ dist
 
 # internal config/state (shared between teams)
 config.json
+artefacts/
 
 # IDE
 .idea/
