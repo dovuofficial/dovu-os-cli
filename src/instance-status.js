@@ -31,7 +31,7 @@ module.exports = async () => {
 
   const status = await tasks.instance(token).status({
     blueprintId: blueprint.id,
-    instanceId: instance.workflow_instance_id
+    instanceId: instance
   })
 
   const state = status.data.status;

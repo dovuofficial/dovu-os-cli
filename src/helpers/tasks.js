@@ -82,7 +82,6 @@ const instance = (accessToken = null) => {
   })
 
   const attach = async ({ workflow_instance_id, user_id }) => {
-
     try {
       const response = await api.post({
         resource: `user-workflow-instances`,
@@ -100,6 +99,8 @@ const instance = (accessToken = null) => {
 
   const send = async ({ workflow_block_instance_id, payload }) => {
 
+    console.log(workflow_block_instance_id);
+    console.log(payload);
     try {
       const response = await api.post({
         resource: `workflow-block-instances/${workflow_block_instance_id}`,
@@ -109,8 +110,14 @@ const instance = (accessToken = null) => {
 
       return response;
     } catch (error) {
-      console.log(error.response?.data);
+
       console.log(error.status);
+      console.log(error.response?.data || error.message);
+
+      if (error.status === 422) {
+        logger.warn("Validation issue")
+        logger.warn(error.response.data.message)
+      }
     }
   }
 

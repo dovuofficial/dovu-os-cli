@@ -29,13 +29,13 @@ module.exports = async ({ role }) => {
   }
 
   logger.hint(`Found actor [${actor.name}], with email [${actor.email}] of role [${role}].`);
-  logger.info(`Will being process of attaching to instance [${instance.workflow_instance_id}].`);
+  logger.info(`Will being process of attaching to instance [${instance}].`);
 
   // Get token as owner of workflow
   const token = await config.reauthenticateActor('owner')
 
   await tasks.instance(token).attach({
-    workflow_instance_id: instance.workflow_instance_id,
+    workflow_instance_id: instance,
     user_id: actor.id
   })
 

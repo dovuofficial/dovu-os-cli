@@ -41,7 +41,10 @@ module.exports = async ({ key }) => {
 
   const blocks = await tasks.getWorkflowBlocks(blueprint);
 
+  config.update(`blocks`, []);
   config.update(`blocks`, blocks);
+
+  config.update(`schema`, {});
 
   blocks.forEach(async (elem) => {
 

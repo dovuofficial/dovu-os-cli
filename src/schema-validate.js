@@ -37,18 +37,25 @@ module.exports = async ({ key, generate = false, force = false }) => {
   });
 
   // Handle generation mode
-  if (generate || !!! Object.keys(payload).length) {
+  if (generate || force || !!!Object.keys(payload).length) {
     const requiredKeys = Object.keys(validationRes?.data || {});
     config.addSchemaToContext(key, requiredKeys, force);
     logger.info(`*** Schema specification for [${key}] generated successfully ***`);
     return;
   }
 
-  // Handle validation result
-  logger.info('*** Schema validation completed successfully ***');
-  logger.info(`Validation result:`);
+  if (validationRes) {
+    // Handle validation result
+    logger.info('*** Schema validation completed successfully ***');
+    logger.info(`Validation result:`);
 
-  listValidationTableView(validationRes.data)
+    listValidationTableView(validationRes.data)
+
+    return
+  }
+
+  logger.hint(`No errors found in validation for [${key}]`);
+
 };
 
 const listValidationTableView = (validation_errs) => {

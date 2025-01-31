@@ -5,9 +5,11 @@ const {
 
 const config = require('./config')();
 
-module.exports = async () => {
+module.exports = async ({
+  force = false,
+}) => {
 
-  const { blueprint, users } = config;
+  const { instance, blueprint, users } = config;
 
   if (! blueprint ) {
     logger.warn('*** Unable to find selected blueprint in configuration context ***')
@@ -26,13 +28,28 @@ module.exports = async () => {
     return;
   }
 
+  if (!! Object.keys(instance).length && ! force) {
+    logger.warn('*** Instance has already been published, unable to republish blueprint with force***')
+    logger.info('To force a new instance of the blueprint');
+    logger.hint('"dovu publish-blueprint -f"');
+
+    return
+  }
+
   const token = await config.reauthenticateActor('owner')
 
-  const instance = await tasks.workflows(token).publish(blueprint)
+  const instancePublished = await tasks.workflows(token).publish(blueprint)
 
-  config.update('instance', instance);
+  config.update('instance', instancePublished.workflow_instance_id);
 
   logger.info('Started publishing of blueprint use the command below to get a status:');
   logger.hint('"dovu instance-status"');
+
+  config.update('block_instance', {});
+  config.update(`block_instance.${instancePublished.workflow_block.key}.root`, instancePublished.id);
+
+
+  logger.info('Removing attached status for all users');
+  Object.keys(config.users).forEach(role =>  config.update(`users.${role}.attached`, false))
 
 };

@@ -21,6 +21,7 @@ var config = {
     supplier: {},
     verifier: {},
   },
+  block_instance: {}, // Holds the dynamic block structure
 };
 
 // Ensure `artefacts` and `context` directories exist
@@ -52,6 +53,16 @@ const loadConfig = () => {
   }
 };
 
+// Save the global configuration to file
+const saveConfig = (file = CONFIG_FILE) => {
+  try {
+    fs.writeFileSync(file, JSON.stringify(config, null, 2), 'utf-8');
+    checkContext();
+  } catch (err) {
+    console.error('Error saving configuration file:', err);
+  }
+};
+
 // Check or create a context folder and files
 const checkContext = () => {
   const contextName = config.context.name || DEFAULT_CONTEXT;
@@ -67,16 +78,7 @@ const checkContext = () => {
   fs.writeFileSync(contextFile, JSON.stringify(config, null, 2), 'utf-8');
 };
 
-// Save the global configuration to file
-const saveConfig = (file = CONFIG_FILE) => {
-  try {
-    fs.writeFileSync(file, JSON.stringify(config, null, 2), 'utf-8');
-    checkContext();
-  } catch (err) {
-    console.error('Error saving configuration file:', err);
-  }
-};
-
+// Update the configuration dynamically
 const update = (path, value) => {
   const keys = path.split('.');
   let current = config;
@@ -87,17 +89,33 @@ const update = (path, value) => {
     current = current[key];
   }
   current[keys[0]] = value;
-
-  // Avoid nesting the context key
-  if (path.startsWith('context.') && path !== 'context.name') {
-    logger.warn(`Skipping nested context update for path: ${path}`);
-    return;
-  }
-
-  saveConfig(); // Persist the updated configuration
-  logger.info(`Updated ${path} in configuration.`);
+  saveConfig();
+  logger.info(`Updated configuration: ${path}`);
 };
 
+// Add a dynamic block instance with support for hierarchical tags
+const addBlockInstance = (key, tag = 'root', id) => {
+  if (!config.block_instance[key]) {
+    config.block_instance[key] = {};
+  }
+  config.block_instance[key][tag] = id;
+  saveConfig();
+  logger.info(`Block instance added: ${key} -> ${tag}`);
+};
+
+// Retrieve a block instance by key and tag (supports dot-notation)
+const getBlockInstance = (key, tag = 'root') => {
+  const parts = tag.split('.');
+  let current = config.block_instance[key];
+  for (const part of parts) {
+    if (!current || !current[part]) {
+      logger.warn(`Block instance not found for ${key} -> ${tag}`);
+      return null;
+    }
+    current = current[part];
+  }
+  return current;
+};
 
 // Generate schema object from keys
 const generateSchemaObject = (keys) => {
@@ -109,7 +127,7 @@ const generateSchemaObject = (keys) => {
 
     for (let i = 0; i < parts.length; i++) {
       if (!current[parts[i]]) {
-        current[parts[i]] = i === parts.length - 1 ? '' : {};
+        current[parts[i]] = i === parts.length - 1 ? 'test' : {};
       }
       current = current[parts[i]];
     }
@@ -189,49 +207,17 @@ const reauthenticateActor = async (role) => {
   return token;
 };
 
-// Load a context from its folder
-const loadContext = (name) => {
-  const contextFolder = path.join(CONTEXT_DIR, name);
-  const contextFile = path.join(contextFolder, 'config.json');
-
-  if (!fs.existsSync(contextFile)) {
-    console.error(`Context file not found: ${contextFile}`);
-    return null;
-  }
-
-  try {
-    return JSON.parse(fs.readFileSync(contextFile, 'utf-8'));
-  } catch (err) {
-    console.error('Error reading context file:', err);
-    return null;
-  }
-};
-
-// Update context configuration
-const updateContext = (contextData) => {
-  const contextName = config.context.name || DEFAULT_CONTEXT;
-  const contextFolder = path.join(CONTEXT_DIR, contextName);
-  const contextFile = path.join(contextFolder, 'config.json');
-
-  try {
-    fs.writeFileSync(contextFile, JSON.stringify(contextData, null, 2), 'utf-8');
-    logger.info(`Context configuration updated for: ${contextName}`);
-  } catch (err) {
-    console.error('Error writing context configuration:', err);
-  }
-};
-
 // Expose configuration and utilities
 module.exports = () => {
   loadConfig();
 
   return {
-    ...config, // Export the default configuration structure
-    reauthenticateActor,
+    ...config,
     update,
+    addBlockInstance,
+    getBlockInstance,
     addSchemaToContext,
     importSchema,
-    loadContext,
-    updateContext,
+    reauthenticateActor,
   };
 };

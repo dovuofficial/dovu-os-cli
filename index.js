@@ -35,19 +35,20 @@ program
 
 // 4. Publish a new workflow instance from a blueprint that has been selected
 program
-  .command('publish-blueprint')
+  .command('publish')
   .description('Publish a new instance of the selected blueprint')
+  .option('-f, --force', 'Force overwrite of current policy instance, if it exists.')
   .action((options) => require('./src/publish-blueprint')(options));
 
 // 4. Publish a new workflow instance from a blueprint that has been selected
 program
-  .command('instance-status')
+  .command('status')
   .description('Return the current status of the workflow instance')
   .action((options) => require('./src/instance-status')(options));
 
 // 4. Attach a user by role into a workflow instance, like a supplier or a verifier
 program
-  .command('instance-attach')
+  .command('attach')
   .description('Attach a user by role into a workflow instance, like a supplier or a verifier.')
   .requiredOption('-r, --role <role>', 'Role of the user being registered for workflow processing, should be stored previously within configuration.')
   .action((options) => require('./src/instance-attach')(options))
@@ -63,10 +64,10 @@ program
 
 // 5. [HIGHEST Priority] Send data or approvals to be sent to a particular block within a workflow
 program
-  .command('instance-send')
+  .command('send')
   .description('Send validated data to a workflow instance, the correct role will be automatically picked up, as well as a data source')
   .requiredOption('-k, --key <schema>', 'Target a key that relates to the schemas you have in your configuration')
-  // .option('-d, --data <data>', '(Might change to a link/file) Data to be validated against a schema')
+  .option('-t, --tag <tag>', 'Append a tag to the new data block instance that will be generated after sending data')
   .action((options) => require('./src/instance-send')(options));
 
 program.parse(process.argv);

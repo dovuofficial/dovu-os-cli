@@ -52,6 +52,7 @@ module.exports = async ({ name }) => {
       blocks: [],
       schema: {},
       instance: {},
+      block_instance: {},
       status: {},
     };
 
@@ -70,6 +71,7 @@ module.exports = async ({ name }) => {
     config.update('blocks', [])
     config.update('blueprint', {})
     config.update('instance', {})
+    config.update('block_instance', {})
     config.update('schema', {})
   }
 };
